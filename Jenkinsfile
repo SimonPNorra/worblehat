@@ -51,7 +51,7 @@ pipeline {
 //                        lock "DEPLOY_PROD" {
                 sh "sudo /etc/init.d/worblehat-prod stop"
                 sh "mvn -B -f worblehat-domain/pom.xml liquibase:update " +
-                        "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat " +
+                        "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_prod " +
                         "-Dpsd.dbserver.username=worblehat " +
                         "-Dpsd.dbserver.password=worblehat"
                 sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-prod/worblehat.jar"
