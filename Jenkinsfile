@@ -1,3 +1,6 @@
+isMaster = env.BRANCH_NAME == 'master'
+isRelease = true // Conditional on new tag
+
 pipeline {
     agent any
     tools {
@@ -23,8 +26,9 @@ pipeline {
             }
         }
 
-        stage('DEPLOY_DEV') {
-            lock "DEPLOY_DEV" {
+        if (isMaster) {
+//            lock "DEPLOY_DEV" {
+            stage('DEPLOY_DEV') {
                 steps {
                     sh "sudo /etc/init.d/worblehat-test stop"
                     sh "mvn -B liquibase:update -Pjenkins"
@@ -32,21 +36,24 @@ pipeline {
                     sh "sudo /etc/init.d/worblehat-test start"
                 }
             }
-        }
 
-        stage('ACCEPTANCE_TEST') {
-            steps {
-                sh 'mvn -B verify -Pjenkins'
-            }
-        }
-
-        stage('DEPLOY_PROD') {
-            lock "DEPLOY_PROD" {
+            stage('ACCEPTANCE_TEST') {
                 steps {
-                    sh "sudo /etc/init.d/worblehat-prod stop"
-                    sh "mvn -B liquibase:update"
-                    sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-prod/worblehat.jar"
-                    sh "sudo /etc/init.d/worblehat-prod start"
+                    sh 'mvn -B verify -Pjenkins'
+                }
+            }
+//            }
+
+            if (isRelease) {
+                stage('DEPLOY_PROD') {
+                    steps {
+//                        lock "DEPLOY_PROD" {
+                        sh "sudo /etc/init.d/worblehat-prod stop"
+                        sh "mvn -B liquibase:update"
+                        sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-prod/worblehat.jar"
+                        sh "sudo /etc/init.d/worblehat-prod start"
+//                        }
+                    }
                 }
             }
         }
