@@ -29,7 +29,6 @@ pipeline {
                     sh "sudo /etc/init.d/worblehat-test stop"
                     sh "mvn -B liquibase:update -Pjenkins"
                     sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-test/worblehat.jar"
-                    sh "sudo rm /tmp/spring.log"
                     sh "sudo /etc/init.d/worblehat-test start"
                 }
             }
@@ -37,13 +36,18 @@ pipeline {
 
         stage('ACCEPTANCE_TEST') {
             steps {
-                echo 'mvn sonar:sonar -Pjenkins'
+                sh 'mvn -B verify -Pjenkins'
             }
         }
 
         stage('DEPLOY_PROD') {
-            steps {
-                echo 'mvn sonar:sonar -Pjenkins'
+            lock "DEPLOY_PROD" {
+                steps {
+                    sh "sudo /etc/init.d/worblehat-prod stop"
+                    sh "mvn -B liquibase:update"
+                    sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-prod/worblehat.jar"
+                    sh "sudo /etc/init.d/worblehat-prod start"
+                }
             }
         }
     }
