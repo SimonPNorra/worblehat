@@ -1,6 +1,8 @@
 pipeline {
     agent any
-
+    triggers {
+        pollSCM '* 7-19 * * 1-5'
+    }
     environment {
         SONAR_URL = 'http://localhost:9000/sonar'
     }
