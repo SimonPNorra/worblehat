@@ -9,13 +9,13 @@ pipeline {
         stage('BUILD') {
             steps {
                 checkout scm
-                sh 'mvn clean install -Pcoverage'
+                sh 'mvn -B clean install -Pcoverage'
             }
         }
 
         stage('QUALITY') {
             steps {
-                sh 'mvn sonar:sonar -Pjenkins'
+                sh 'mvn -B sonar:sonar -Pjenkins'
             }
         }
 
