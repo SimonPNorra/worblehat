@@ -22,10 +22,7 @@ pipeline {
 
         stage('DEPLOY_DEV') {
             when {
-                anyOf {
-                    branch 'master'
-                    buildingTag()
-                }
+                branch 'master'
             }
             steps {
                 sh "sudo /etc/init.d/worblehat-test stop"
@@ -41,10 +38,7 @@ pipeline {
 
         stage('ACCEPTANCE_TEST') {
             when {
-                anyOf {
-                    branch 'master'
-                    buildingTag()
-                }
+                branch 'master'
             }
             steps {
                 sh 'mvn -B verify -Pjenkins'
@@ -53,7 +47,7 @@ pipeline {
 
         stage('DEPLOY_PROD') {
             when {
-                buildingTag()
+                branch 'master'
             }
             steps {
                 sh "sudo /etc/init.d/worblehat-prod stop"
