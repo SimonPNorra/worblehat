@@ -1,5 +1,3 @@
-isMaster = env.BRANCH_NAME == 'master'
-isRelease = true // Conditional on new tag
 
 pipeline {
     agent any
@@ -26,35 +24,35 @@ pipeline {
             }
         }
 
-        if (isMaster) {
+//        if (isMaster) {
 //            lock "DEPLOY_DEV" {
-            stage('DEPLOY_DEV') {
-                steps {
-                    sh "sudo /etc/init.d/worblehat-test stop"
-                    sh "mvn -B liquibase:update -Pjenkins"
-                    sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-test/worblehat.jar"
-                    sh "sudo /etc/init.d/worblehat-test start"
-                }
+        stage('DEPLOY_DEV') {
+            steps {
+                sh "sudo /etc/init.d/worblehat-test stop"
+                sh "mvn -B liquibase:update -Pjenkins"
+                sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-test/worblehat.jar"
+                sh "sudo /etc/init.d/worblehat-test start"
             }
+        }
 
-            stage('ACCEPTANCE_TEST') {
-                steps {
-                    sh 'mvn -B verify -Pjenkins'
-                }
+        stage('ACCEPTANCE_TEST') {
+            steps {
+                sh 'mvn -B verify -Pjenkins'
             }
+        }
 //            }
 
-            if (isRelease) {
-                stage('DEPLOY_PROD') {
-                    steps {
+//            if (isRelease) {
+        stage('DEPLOY_PROD') {
+            steps {
 //                        lock "DEPLOY_PROD" {
-                        sh "sudo /etc/init.d/worblehat-prod stop"
-                        sh "mvn -B liquibase:update"
-                        sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-prod/worblehat.jar"
-                        sh "sudo /etc/init.d/worblehat-prod start"
+                sh "sudo /etc/init.d/worblehat-prod stop"
+                sh "mvn -B liquibase:update"
+                sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-prod/worblehat.jar"
+                sh "sudo /etc/init.d/worblehat-prod start"
 //                        }
-                    }
-                }
+//                    }
+//                }
             }
         }
     }
