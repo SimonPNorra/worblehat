@@ -20,9 +20,13 @@ pipeline {
             }
         }
 
-//        if (isMaster) {
-//            lock "DEPLOY_DEV" {
         stage('DEPLOY_DEV') {
+            when {
+                anyOf {
+                    branch 'master'
+                    buildingTag()
+                }
+            }
             steps {
                 sh "sudo /etc/init.d/worblehat-test stop"
                 sh "mvn -B -f worblehat-domain/pom.xml liquibase:update -Pjenkins " +
@@ -36,16 +40,22 @@ pipeline {
         }
 
         stage('ACCEPTANCE_TEST') {
+            when {
+                anyOf {
+                    branch 'master'
+                    buildingTag()
+                }
+            }
             steps {
                 sh 'mvn -B verify -Pjenkins'
             }
         }
-//            }
 
-//            if (isRelease) {
         stage('DEPLOY_PROD') {
+            when {
+                buildingTag()
+            }
             steps {
-//                        lock "DEPLOY_PROD" {
                 sh "sudo /etc/init.d/worblehat-prod stop"
                 sh "mvn -B -f worblehat-domain/pom.xml liquibase:update " +
                         "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_prod " +
@@ -53,9 +63,6 @@ pipeline {
                         "-Dpsd.dbserver.password=worblehat"
                 sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-prod/worblehat.jar"
                 sh "sudo /etc/init.d/worblehat-prod start"
-//                        }
-//                    }
-//                }
             }
         }
     }
