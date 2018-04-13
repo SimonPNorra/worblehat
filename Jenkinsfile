@@ -25,7 +25,7 @@ pipeline {
             }
         }
 
-        stage('QUALITY') {
+        stage('ACCEPTANCE_TEST') {
             steps {
                 echo 'mvn sonar:sonar -Pjenkins'
             }
