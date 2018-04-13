@@ -8,7 +8,6 @@ pipeline {
     stages {
         stage('BUILD') {
             steps {
-                checkout scm
                 sh 'mvn -B clean install -Pcoverage'
             }
         }
