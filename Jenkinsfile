@@ -24,8 +24,14 @@ pipeline {
         }
 
         stage('DEPLOY_DEV') {
-            steps {
-                echo 'mvn sonar:sonar -Pjenkins'
+            lock "DEPLOY_DEV" {
+                steps {
+                    sh "sudo /etc/init.d/worblehat-test stop"
+                    sh "mvn -B liquibase:update -Pjenkins"
+                    sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-test/worblehat.jar"
+                    sh "sudo rm /tmp/spring.log"
+                    sh "sudo /etc/init.d/worblehat-test start"
+                }
             }
         }
 
