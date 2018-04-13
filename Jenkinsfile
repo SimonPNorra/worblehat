@@ -28,7 +28,7 @@ pipeline {
         stage('DEPLOY_DEV') {
             steps {
                 sh "sudo /etc/init.d/worblehat-test stop"
-                sh "mvn -B liquibase:update -Pjenkins " +
+                sh "mvn -B -f worblehat-domain/pom.xml liquibase:update -Pjenkins " +
                         "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_test " +
                         "-Dpsd.dbserver.username=worblehat " +
                         "-Dpsd.dbserver.password=worblehat"
@@ -50,7 +50,7 @@ pipeline {
             steps {
 //                        lock "DEPLOY_PROD" {
                 sh "sudo /etc/init.d/worblehat-prod stop"
-                sh "mvn -B liquibase:update " +
+                sh "mvn -B -f worblehat-domain/pom.xml liquibase:update " +
                         "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat " +
                         "-Dpsd.dbserver.username=worblehat " +
                         "-Dpsd.dbserver.password=worblehat"
