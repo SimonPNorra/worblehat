@@ -5,6 +5,10 @@ pipeline {
         jdk 'JDK-8'
     }
 
+    environment {
+        SONAR_URL = 'http://localhost:9000/sonar'
+    }
+
     stages {
         stage('BUILD') {
             steps {
