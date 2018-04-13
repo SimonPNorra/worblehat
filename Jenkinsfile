@@ -1,9 +1,5 @@
 pipeline {
     agent any
-    tools {
-        maven 'maven-3.3.3'
-        jdk 'JDK-8'
-    }
 
     environment {
         SONAR_URL = 'http://localhost:9000/sonar'
