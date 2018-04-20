@@ -40,11 +40,11 @@ pipeline {
         }
 
         stage('DEPLOY DEV') {
-            lock 'DEV_ENVIRONMENT' {
-                when {
-                    branch 'master'
-                }
-                steps {
+            when {
+                branch 'master'
+            }
+            steps {
+                lock 'DEV_ENVIRONMENT' {
                     sh "sudo /etc/init.d/worblehat-test stop"
                     sh "mvn -B -f worblehat-domain/pom.xml liquibase:update -Pjenkins " +
                             "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_test " +
@@ -58,11 +58,11 @@ pipeline {
         }
 
         stage('ACCEPTANCE TEST') {
-            lock 'DEV_ENVIRONMENT' {
-                when {
-                    branch 'master'
-                }
-                steps {
+            when {
+                branch 'master'
+            }
+            steps {
+                lock 'DEV_ENVIRONMENT' {
                     sh 'mvn -B verify -Pjenkins'
                 }
             }
