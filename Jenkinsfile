@@ -60,13 +60,13 @@ pipeline {
                 branch 'master'
             }
             steps {
-                sh 'mvn -B verify -Pjenkins -Pheadless -Pinclude-acceptancetests -Dapplication.url=http://18.184.100.73/worblehat-test'
+                sh 'mvn -B verify -Pjenkins -Pheadless -Pinclude-acceptancetests -Dapplication.url=http://localhost/worblehat-test'
                 publishHTML(
                         [allowMissing         : false,
                          alwaysLinkToLastBuild: false,
                          keepAll              : false,
                          reportDir            : 'worblehat-acceptancetests/target/jbehave/view',
-                         reportFiles          : 'report.html',
+                         reportFiles          : 'reports.html',
                          reportName           : 'Worblehat Acceptance Test Report',
                          reportTitles         : 'Worblehat Acceptance Test Report']
                 )
