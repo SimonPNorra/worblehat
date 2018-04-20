@@ -12,6 +12,7 @@ pipeline {
         stage('BUILD') {
             steps {
                 sh 'mvn -B clean install -Pcoverage'
+                junit '**/target/surefire-reports/*.xml'
             }
         }
 
