@@ -43,17 +43,15 @@ pipeline {
             when {
                 branch 'master'
             }
-            steps {
-                lock 'DEV_ENVIRONMENT' {
-                    sh "sudo /etc/init.d/worblehat-test stop"
-                    sh "mvn -B -f worblehat-domain/pom.xml liquibase:update -Pjenkins " +
-                            "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_test " +
-                            "-Dpsd.dbserver.username=worblehat " +
-                            "-Dpsd.dbserver.password=worblehat"
+            lock 'DEV_ENVIRONMENT' {
+                sh "sudo /etc/init.d/worblehat-test stop"
+                sh "mvn -B -f worblehat-domain/pom.xml liquibase:update -Pjenkins " +
+                        "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_test " +
+                        "-Dpsd.dbserver.username=worblehat " +
+                        "-Dpsd.dbserver.password=worblehat"
 
-                    sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-test/worblehat.jar"
-                    sh "sudo /etc/init.d/worblehat-test start"
-                }
+                sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-test/worblehat.jar"
+                sh "sudo /etc/init.d/worblehat-test start"
             }
         }
 
@@ -61,10 +59,8 @@ pipeline {
             when {
                 branch 'master'
             }
-            steps {
-                lock 'DEV_ENVIRONMENT' {
-                    sh 'mvn -B verify -Pjenkins'
-                }
+            lock 'DEV_ENVIRONMENT' {
+                sh 'mvn -B verify -Pjenkins'
             }
         }
 
