@@ -43,42 +43,35 @@ pipeline {
             when {
                 branch 'master'
             }
+            steps {
+                sh "sudo /etc/init.d/worblehat-test stop"
+                sh "mvn -B -f worblehat-domain/pom.xml liquibase:update -Pjenkins " +
+                        "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_test " +
+                        "-Dpsd.dbserver.username=worblehat " +
+                        "-Dpsd.dbserver.password=worblehat"
 
-            options {
-                lock('DEV_ENVIRONMENT')
-            }
-
-            stages {
-                stage('DEPLOYMENT') {
-                    steps {
-                        sh "sudo /etc/init.d/worblehat-test stop"
-                        sh "mvn -B -f worblehat-domain/pom.xml liquibase:update -Pjenkins " +
-                                "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_test " +
-                                "-Dpsd.dbserver.username=worblehat " +
-                                "-Dpsd.dbserver.password=worblehat"
-
-                        sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-test/worblehat.jar"
-                        sh "sudo /etc/init.d/worblehat-test start"
-                    }
-                }
-
-                stage('ACCEPTANCE TEST') {
-                    steps {
-                        sh 'mvn -B verify -Pjenkins -Pheadless -Pinclude-acceptancetests -Dapplication.url=http://localhost/worblehat-test'
-                        publishHTML(
-                                [allowMissing         : false,
-                                 alwaysLinkToLastBuild: false,
-                                 keepAll              : false,
-                                 reportDir            : 'worblehat-acceptancetests/target/jbehave/view',
-                                 reportFiles          : 'reports.html',
-                                 reportName           : 'Worblehat Acceptance Test Report',
-                                 reportTitles         : 'Worblehat Acceptance Test Report']
-                        )
-                    }
-                }
+                sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-test/worblehat.jar"
+                sh "sudo /etc/init.d/worblehat-test start"
             }
         }
 
+        stage('ACCEPTANCE TEST') {
+            when {
+                branch 'master'
+            }
+            steps {
+                sh 'mvn -B verify -Pjenkins -Pheadless -Pinclude-acceptancetests -Dapplication.url=http://localhost/worblehat-test'
+                publishHTML(
+                        [allowMissing         : false,
+                         alwaysLinkToLastBuild: false,
+                         keepAll              : false,
+                         reportDir            : 'worblehat-acceptancetests/target/jbehave/view',
+                         reportFiles          : 'reports.html',
+                         reportName           : 'Worblehat Acceptance Test Report',
+                         reportTitles         : 'Worblehat Acceptance Test Report']
+                )
+            }
+        }
 
         stage('DEPLOY PROD') {
             when {
