@@ -11,8 +11,11 @@ pipeline {
     stages {
         stage('BUILD') {
             steps {
-                sh 'mvn -B clean install -Pcoverage'
-                junit '**/target/surefire-reports/*.xml'
+                try {
+                    sh 'mvn -B clean install -Pcoverage'
+                } finally {
+                    junit '**/target/surefire-reports/*.xml'
+                }
             }
         }
 
@@ -24,7 +27,7 @@ pipeline {
             }
         }
 
-        stage('DEPLOY_DEV') {
+        stage('DEPLOY DEV') {
             when {
                 branch 'master'
             }
@@ -40,7 +43,7 @@ pipeline {
             }
         }
 
-        stage('ACCEPTANCE_TEST') {
+        stage('ACCEPTANCE TEST') {
             when {
                 branch 'master'
             }
@@ -49,7 +52,7 @@ pipeline {
             }
         }
 
-        stage('DEPLOY_PROD') {
+        stage('DEPLOY PROD') {
             when {
                 branch 'master'
             }
