@@ -61,23 +61,30 @@ pipeline {
             }
             steps {
                 sh 'mvn -B verify -Pjenkins'
+                publishHTML(
+                        [allowMissing         : false,
+                         alwaysLinkToLastBuild: false,
+                         keepAll              : false,
+                         reportDir            : 'worblehat-acceptancetests/target/jbehave/view',
+                         reportFiles          : 'report.html',
+                         reportName           : 'Worblehat Acceptance Test Report',
+                         reportTitles         : 'Worblehat Acceptance Test Report']
+                )
             }
         }
 
-        lock 'PROD_ENVIRONMENT' {
-            stage('DEPLOY PROD') {
-                when {
-                    branch 'master'
-                }
-                steps {
-                    sh "sudo /etc/init.d/worblehat-prod stop"
-                    sh "mvn -B -f worblehat-domain/pom.xml liquibase:update " +
-                            "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_prod " +
-                            "-Dpsd.dbserver.username=worblehat " +
-                            "-Dpsd.dbserver.password=worblehat"
-                    sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-prod/worblehat.jar"
-                    sh "sudo /etc/init.d/worblehat-prod start"
-                }
+        stage('DEPLOY PROD') {
+            when {
+                branch 'master'
+            }
+            steps {
+                sh "sudo /etc/init.d/worblehat-prod stop"
+                sh "mvn -B -f worblehat-domain/pom.xml liquibase:update " +
+                        "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_prod " +
+                        "-Dpsd.dbserver.username=worblehat " +
+                        "-Dpsd.dbserver.password=worblehat"
+                sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-prod/worblehat.jar"
+                sh "sudo /etc/init.d/worblehat-prod start"
             }
         }
     }
