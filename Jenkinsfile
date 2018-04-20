@@ -39,8 +39,8 @@ pipeline {
             }
         }
 
-        lock 'DEV_ENVIRONMENT' {
-            stage('DEPLOY DEV') {
+        stage('DEPLOY DEV') {
+            lock 'DEV_ENVIRONMENT' {
                 when {
                     branch 'master'
                 }
@@ -55,8 +55,10 @@ pipeline {
                     sh "sudo /etc/init.d/worblehat-test start"
                 }
             }
+        }
 
-            stage('ACCEPTANCE TEST') {
+        stage('ACCEPTANCE TEST') {
+            lock 'DEV_ENVIRONMENT' {
                 when {
                     branch 'master'
                 }
