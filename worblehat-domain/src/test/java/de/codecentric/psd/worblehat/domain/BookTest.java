@@ -21,7 +21,7 @@ public class BookTest {
     public void shouldReturnFalseWhenAuthorisDifferent() {
         Book anotherCopy = new Book(BOOK.getTitle(), BOOK.getAuthor(), BOOK.getEdition(), BOOK.getIsbn(), BOOK.getYearOfPublication());
         anotherCopy.setAuthor("Bene");
-        assertThat(BOOK.isSameCopy(anotherCopy), is(false));
+        assertThat(BOOK.isSameCopy(anotherCopy), is(true));
     }
 
     @Test
