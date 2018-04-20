@@ -60,7 +60,7 @@ pipeline {
                 branch 'master'
             }
             steps {
-                sh 'mvn -B verify -Pjenkins'
+                sh 'mvn -B verify -Pjenkins -Pheadless -Pinclude-acceptancetests -Dapplication.url=http://localhost/worblehat-test'
                 publishHTML(
                         [allowMissing         : false,
                          alwaysLinkToLastBuild: false,
