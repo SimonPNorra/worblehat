@@ -25,7 +25,7 @@ pipeline {
                 branch 'master'
             }
             steps {
-                sh "mvn -B sonar:sonar -Pjenkins -Dsonar.branch.name=${env.BRANCH_NAME}"
+                sh "mvn -B sonar:sonar -Pjenkins"
             }
         }
 
@@ -43,7 +43,7 @@ pipeline {
             when {
                 branch 'master'
             }
-            lock 'DEV_ENVIRONMENT' {
+            steps {
                 sh "sudo /etc/init.d/worblehat-test stop"
                 sh "mvn -B -f worblehat-domain/pom.xml liquibase:update -Pjenkins " +
                         "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_test " +
@@ -59,7 +59,7 @@ pipeline {
             when {
                 branch 'master'
             }
-            lock 'DEV_ENVIRONMENT' {
+            steps {
                 sh 'mvn -B verify -Pjenkins'
             }
         }
