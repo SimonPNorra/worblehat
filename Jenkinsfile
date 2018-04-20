@@ -21,50 +21,65 @@ pipeline {
         }
 
         stage('QUALITY') {
+            when {
+                branch 'master'
+            }
             steps {
-                sh 'mvn -B sonar:sonar -Pjenkins'
+                sh "mvn -B sonar:sonar -Pjenkins -Dsonar.branch.name=${env.BRANCH_NAME}"
+            }
+        }
+
+        stage('REPORTING') {
+            when {
+                branch 'master'
+            }
+            steps {
                 sh 'mvn -B site:site site:stage'
                 sh 'cp -r target/staging/. ${SITE_DEPLOY_PATH}/site'
             }
         }
 
-        stage('DEPLOY DEV') {
-            when {
-                branch 'master'
-            }
-            steps {
-                sh "sudo /etc/init.d/worblehat-test stop"
-                sh "mvn -B -f worblehat-domain/pom.xml liquibase:update -Pjenkins " +
-                        "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_test " +
-                        "-Dpsd.dbserver.username=worblehat " +
-                        "-Dpsd.dbserver.password=worblehat"
+        lock 'DEV_ENVIRONMENT' {
+            stage('DEPLOY DEV') {
+                when {
+                    branch 'master'
+                }
+                steps {
+                    sh "sudo /etc/init.d/worblehat-test stop"
+                    sh "mvn -B -f worblehat-domain/pom.xml liquibase:update -Pjenkins " +
+                            "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_test " +
+                            "-Dpsd.dbserver.username=worblehat " +
+                            "-Dpsd.dbserver.password=worblehat"
 
-                sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-test/worblehat.jar"
-                sh "sudo /etc/init.d/worblehat-test start"
+                    sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-test/worblehat.jar"
+                    sh "sudo /etc/init.d/worblehat-test start"
+                }
+            }
+
+            stage('ACCEPTANCE TEST') {
+                when {
+                    branch 'master'
+                }
+                steps {
+                    sh 'mvn -B verify -Pjenkins'
+                }
             }
         }
 
-        stage('ACCEPTANCE TEST') {
-            when {
-                branch 'master'
-            }
-            steps {
-                sh 'mvn -B verify -Pjenkins'
-            }
-        }
-
-        stage('DEPLOY PROD') {
-            when {
-                branch 'master'
-            }
-            steps {
-                sh "sudo /etc/init.d/worblehat-prod stop"
-                sh "mvn -B -f worblehat-domain/pom.xml liquibase:update " +
-                        "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_prod " +
-                        "-Dpsd.dbserver.username=worblehat " +
-                        "-Dpsd.dbserver.password=worblehat"
-                sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-prod/worblehat.jar"
-                sh "sudo /etc/init.d/worblehat-prod start"
+        lock 'PROD_ENVIRONMENT' {
+            stage('DEPLOY PROD') {
+                when {
+                    branch 'master'
+                }
+                steps {
+                    sh "sudo /etc/init.d/worblehat-prod stop"
+                    sh "mvn -B -f worblehat-domain/pom.xml liquibase:update " +
+                            "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_prod " +
+                            "-Dpsd.dbserver.username=worblehat " +
+                            "-Dpsd.dbserver.password=worblehat"
+                    sh "cp ${env.WORKSPACE}/worblehat-web/target/*.jar /opt/worblehat-prod/worblehat.jar"
+                    sh "sudo /etc/init.d/worblehat-prod start"
+                }
             }
         }
     }
