@@ -5,6 +5,7 @@ pipeline {
     }
     environment {
         SONAR_URL = 'http://localhost:9000/sonar'
+        SITE_DEPLOY_PATH = '/scrumfordevelopers/nginx_root/worblehat-site'
     }
 
     stages {
@@ -17,6 +18,8 @@ pipeline {
         stage('QUALITY') {
             steps {
                 sh 'mvn -B sonar:sonar -Pjenkins'
+                sh 'mvn -B site:site site:stage'
+                sh 'cp -r target/staging/. ${SITE_DEPLOY_PATH}/site'
             }
         }
 
