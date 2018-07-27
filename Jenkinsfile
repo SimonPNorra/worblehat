@@ -11,7 +11,13 @@ pipeline {
     stages {
         stage('BUILD') {
             steps {
-                sh 'mvn -B clean install -Pcoverage'
+                sh 'mvn -B clean install -DskipTests'
+            }
+        }
+
+        stage('UNIT TEST') {
+            steps {
+                sh 'mvn -B verify -Pcoverage'
             }
             post {
                 always {
@@ -25,7 +31,7 @@ pipeline {
                 branch 'master'
             }
             steps {
-                sh "mvn -B sonar:sonar -Pjenkins"
+                sh 'mvn -B sonar:sonar -Pjenkins'
             }
         }
 
