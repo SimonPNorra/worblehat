@@ -30,9 +30,9 @@ pipeline {
 
     stage('QUALITY') {
       agent any
-      when {
-        branch 'master'
-      }
+//      when {
+//        branch 'master'
+//      }
       steps {
         sh 'mvn -B sonar:sonar -Pjenkins'
       }
