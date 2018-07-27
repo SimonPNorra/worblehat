@@ -171,6 +171,7 @@
                 see: https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner+for+Maven
                 -->
                 <sonar.host.url>${env.SONAR_URL}</sonar.host.url>
+                <sonar.projectKey>${artifactId}-${env.BRANCH_NAME}</sonar.projectKey>
             </properties>
         </profile>
         <profile>
