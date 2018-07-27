@@ -51,7 +51,6 @@ pipeline {
       }
       steps {
         lock(resource: "DEV_ENV", label: null) {
-          milestone(ordinal: 10, label: 'DEV_ENV')
           sh "sudo /etc/init.d/worblehat-test stop"
           sh "mvn -B -f worblehat-domain/pom.xml liquibase:update -Pjenkins " +
                   "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_test " +
@@ -69,16 +68,18 @@ pipeline {
         branch 'master'
       }
       steps {
-        sh 'mvn -B verify -Pjenkins -Pheadless -Pinclude-acceptancetests -Dapplication.url=http://localhost/worblehat-test'
-        publishHTML(
-                [allowMissing         : false,
-                 alwaysLinkToLastBuild: false,
-                 keepAll              : false,
-                 reportDir            : 'worblehat-acceptancetests/target/jbehave/view',
-                 reportFiles          : 'reports.html',
-                 reportName           : 'Worblehat Acceptance Test Report',
-                 reportTitles         : 'Worblehat Acceptance Test Report']
-        )
+        lock(resource: "DEV_ENV", label: null) {
+          sh 'mvn -B verify -Pjenkins -Pheadless -Pinclude-acceptancetests -Dapplication.url=http://localhost/worblehat-test'
+          publishHTML(
+                  [allowMissing         : false,
+                   alwaysLinkToLastBuild: false,
+                   keepAll              : false,
+                   reportDir            : 'worblehat-acceptancetests/target/jbehave/view',
+                   reportFiles          : 'reports.html',
+                   reportName           : 'Worblehat Acceptance Test Report',
+                   reportTitles         : 'Worblehat Acceptance Test Report']
+          )
+        }
       }
     }
 
@@ -88,7 +89,6 @@ pipeline {
       }
       steps {
         lock(resource: "DEV_ENV", label: null) {
-          milestone(ordinal: 10, label: 'DEV_ENV')
           sh "sudo /etc/init.d/worblehat-prod stop"
           sh "mvn -B -f worblehat-domain/pom.xml liquibase:update " +
                   "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_prod " +
