@@ -1,5 +1,5 @@
 pipeline {
-  agent any
+  agent none
   triggers {
     pollSCM '* 7-19 * * 1-5'
   }
@@ -10,12 +10,14 @@ pipeline {
 
   stages {
     stage('BUILD') {
+      agent any
       steps {
         sh 'mvn -B clean install -DskipTests'
       }
     }
 
     stage('UNIT TEST') {
+      agent any
       steps {
         sh 'mvn -B verify -Pcoverage'
       }
@@ -27,6 +29,7 @@ pipeline {
     }
 
     stage('QUALITY') {
+      agent any
       when {
         branch 'master'
       }
@@ -36,6 +39,7 @@ pipeline {
     }
 
     stage('REPORTING') {
+      agent any
       when {
         branch 'master'
       }
@@ -46,6 +50,7 @@ pipeline {
     }
 
     stage('DEPLOY DEV') {
+      agent any
       when {
         branch 'master'
       }
@@ -64,6 +69,7 @@ pipeline {
     }
 
     stage('ACCEPTANCE TEST') {
+      agent any
       when {
         branch 'master'
       }
@@ -83,12 +89,26 @@ pipeline {
       }
     }
 
-    stage('DEPLOY PROD') {
+    stage('PROD APPROVAL') {
+      agent none
       when {
         branch 'master'
       }
       steps {
-        lock(resource: "DEV_ENV", label: null) {
+        milestone(ordinal: 50, label: "PROD_APPROVAL_REACHED")
+        script {
+          input message: 'Should we deploy to Prod?', ok: 'Yes, please.'
+        }
+      }
+    }
+
+    stage('DEPLOY PROD') {
+      agent any
+      when {
+        branch 'master'
+      }
+      steps {
+        lock(resource: "PROD_ENV", label: null) {
           sh "sudo /etc/init.d/worblehat-prod stop"
           sh "mvn -B -f worblehat-domain/pom.xml liquibase:update " +
                   "-Dpsd.dbserver.url=jdbc:mysql://localhost:3306/worblehat_prod " +
